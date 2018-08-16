@@ -1,0 +1,81 @@
+﻿@model CASCADINGDROPDOWNLIST.Models.StateModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+@Html.AntiForgeryToken()
+
+<div class="form-horizontal" style="padding-top:20px;">
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div>
+        @Html.DropDownList("dropdownCountry", new SelectList(string.Empty, "Value", "Text"), null, "Choose..",  "Please select a country", new { @class = "form-control" , @style = "width:250px;" })
+    </div>
+    <div style="margin-top:50px;">
+        @Html.DropDownList("dropdownState", new SelectList(string.Empty, "Value", "Text"), null, "Choose..",  "Please select a state", new { @class = "form-control" , @style = "width:250px;" })
+    </div>
+    <div style="margin-top:50px;">
+        @Html.DropDownList("dropdownCity", new SelectList(string.Empty, "Value", "Text"), null, "Choose..",  "Please select a City", new { @class = "form-control", @style = "width:250px;" })
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Create" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            type: "GET",
+            url: "/State/getcountries",
+            datatype: "Json",
+            success: function (data) {
+                $.each(data, function (index, value) {
+                    $('#dropdownCountry').append('<option value="' + value.CountryId + '">' + value.CountryName + '</option>');
+                });
+            }
+        });
+
+        $('#dropdownCountry').change(function () {
+            $('#dropdownState').empty();
+            $.ajax({
+                type: "POST",
+                url: "/State/GetStatesByCountryId",
+                datatype: "Json",
+                data: { countryId: $('#dropdownCountry').val() },
+                success: function (data) {
+                    $.each(data, function (index, value) {
+                        $('#dropdownState').append('<option value="' + value.Id + '">' + value.StateName + '</option>');
+                    });
+                }
+            });
+        });
+
+        $('#dropdownState').change(function () {
+
+            $('#dropdownCity').empty();
+
+            $.ajax({
+                type: "POST",
+                url: "/State/GetCityByStateId",
+                datatype: "Json",
+                data: { StateId: $('#dropdownState').val() },
+                success: function (data) {
+                    $.each(data, function (index, value) {
+                        $('#dropdownCity').append('<option value="' + value.CityId + '">' + value.CityName + '</option>');
+                    });
+                }
+            });
+        });
+    });
+</script>
